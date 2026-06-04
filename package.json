@@ -1,11 +1,17 @@
 {
   "name": "wcag-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for web accessibility. Check UI components against WCAG 2.1 and 2.2 patterns and get accessible code fixes.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "wcag-kit": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "build": "tsc",
@@ -17,7 +23,10 @@
     "accessibility",
     "a11y",
     "mcp",
-    "model-context-protocol"
+    "model-context-protocol",
+    "screen-reader",
+    "keyboard-navigation",
+    "aria"
   ],
   "author": "Jainish Soni",
   "license": "MIT",
