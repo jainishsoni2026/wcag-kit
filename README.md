@@ -37,19 +37,33 @@ Your AI assistant reads the tools and decides when to use them.
 
 | ID | Component | WCAG Reference |
 |---|---|---|
-| `dropdown` | Dropdown Menu | WCAG 2.1.1 |
-| `modal` | Modal / Dialog | WCAG 2.1.2 |
-| `form` | Form Validation | WCAG 1.3.1 |
-| `headings` | Heading Hierarchy | WCAG 1.3.1 |
-| `button` | Button Accessibility | WCAG 4.1.2 |
-| `image` | Image Alt Text | WCAG 1.1.1 |
-| `contrast` | Color Contrast | WCAG 1.4.3 |
-| `navigation` | Navigation Landmark | WCAG 2.4.1 |
-| `accordion` | Accordion / Disclosure | WCAG 4.1.2 |
-| `tabs` | Tabs Component | WCAG 2.1.1 |
-| `toast` | Toast / Live Region | WCAG 4.1.3 |
-| `table` | Data Table | WCAG 1.3.1 |
-| `focus` | Focus Management | WCAG 2.4.3 |
+| dropdown | Dropdown Menu | WCAG 2.1.1 |
+| modal | Modal / Dialog | WCAG 2.1.2 |
+| form | Form Validation | WCAG 1.3.1 |
+| headings | Heading Hierarchy | WCAG 1.3.1 |
+| button | Button Accessibility | WCAG 4.1.2 |
+| image | Image Alt Text | WCAG 1.1.1 |
+| contrast | Color Contrast | WCAG 1.4.3 |
+| navigation | Navigation Landmark | WCAG 2.4.1 |
+| accordion | Accordion / Disclosure | WCAG 4.1.2 |
+| tabs | Tabs Component | WCAG 2.1.1 |
+| toast | Toast / Live Region | WCAG 4.1.3 |
+| table | Data Table | WCAG 1.3.1 |
+| focus | Focus Management | WCAG 2.4.3 |
+| combobox | Combobox (List Autocomplete) | WCAG 2.1.1 |
+| tooltip | Tooltip | WCAG 1.4.13 |
+| datepicker | Date Picker | WCAG 2.1.1 |
+| carousel | Carousel | WCAG 2.1.1 |
+| progress | Progress Indicator | WCAG 4.1.3 |
+| pagination | Pagination | WCAG 2.4.1 |
+| dragdrop | Drag and Drop | WCAG 2.5.7 |
+| radiocheckbox | Radio Group and Checkbox Group | WCAG 1.3.1 |
+| search | Search | WCAG 4.1.2 |
+| infinitescroll | Infinite Scroll / Load More | WCAG 4.1.3 |
+| fileupload | File Upload | WCAG 4.1.2 |
+| skeleton | Skeleton / Loading State | WCAG 4.1.3 |
+| alertdialog | Alert Dialog | WCAG 2.1.2 |
+| breadcrumb | Breadcrumb | WCAG 2.4.8 |
 
 ---
 

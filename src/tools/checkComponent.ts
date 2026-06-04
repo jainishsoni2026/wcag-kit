@@ -50,6 +50,223 @@ const rules: CheckRule[] = [
     }
   },
   {
+    id: "breadcrumb-missing-landmark",
+    test: (html) =>
+      (/breadcrumb|breadcrumbs/i.test(html) ||
+        (/>\s*\/\s*</.test(html) && /home|products|category/i.test(html))) &&
+      !/aria-label\s*=\s*['"]breadcrumb['"]/i.test(html) &&
+      (!/<nav/i.test(html) || !/breadcrumb/i.test(html)),
+    issue: {
+      wcagRef: "WCAG 2.4.8",
+      description: "A breadcrumb trail is not wrapped in a nav landmark labelled Breadcrumb. Screen reader users cannot distinguish it from other navigation or identify the current page.",
+      impact: "serious",
+      fix: 'Wrap the trail in <nav aria-label="Breadcrumb"><ol>…</ol></nav>. Use links for parent pages only. Mark the current page with aria-current="page" as plain text. Hide "/" separators with aria-hidden="true".',
+      learnMoreUrl: "https://wcaginpractice.com/playground#breadcrumb"
+    }
+  },
+  {
+    id: "alertdialog-missing-role",
+    test: (html) =>
+      (/confirm|delete account|destructive|are you sure|discard changes/i.test(html) ||
+        /alert.?dialog|confirmation/i.test(html)) &&
+      !/role\s*=\s*['"]alertdialog['"]/i.test(html) &&
+      (/role\s*=\s*['"]dialog['"]/i.test(html) ||
+        /<div[^>]*(?:confirm|delete|modal)/i.test(html)),
+    issue: {
+      wcagRef: "WCAG 2.1.2",
+      description: "A destructive confirmation uses a plain div or role=dialog instead of role=alertdialog. Screen readers may not convey that an immediate response is required.",
+      impact: "critical",
+      fix: "Use role=\"alertdialog\" with aria-modal=\"true\", aria-labelledby, and aria-describedby. Move focus to the Cancel button on open, trap Tab inside, and close on Escape without performing the destructive action.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#alertdialog"
+    }
+  },
+  {
+    id: "fileupload-hidden-input",
+    test: (html) =>
+      (/type\s*=\s*['"]file['"]/i.test(html) || /file.?upload|upload/i.test(html)) &&
+      (/display\s*:\s*none|display\s*:\s*['"]none['"]/i.test(html) ||
+        /visibility\s*:\s*hidden/i.test(html)) &&
+      /<div[^>]*upload/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description: "A file input is hidden with display:none or similar and replaced by a non-focusable styled element. Keyboard and screen reader users cannot activate the file picker.",
+      impact: "critical",
+      fix: "Keep the native input in the tab order (visually hidden with opacity/clip, not display:none). Use a <label for=\"...\"> as the styled button. Announce the chosen file name with aria-live after selection.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#fileupload"
+    }
+  },
+  {
+    id: "infinitescroll-missing-live",
+    test: (html) =>
+      (/load more|infinite.?scroll|lazy.?load/i.test(html) ||
+        (/scroll/i.test(html) && /fetch|append|inject/i.test(html))) &&
+      !/aria-live/i.test(html) &&
+      !/role\s*=\s*['"]status['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.3",
+      description: "Content loads dynamically (infinite scroll or load more) with no aria-live region. Screen reader users are not told when new items appear or when loading finishes.",
+      impact: "serious",
+      fix: "Use a Load More button with aria-live=polite to announce loading and results (e.g. 10 new items loaded, 30 total). Keep focus on the button after load. Provide a keyboard-accessible alternative to scroll-only loading.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#infinitescroll"
+    }
+  },
+  {
+    id: "search-missing-label",
+    test: (html) =>
+      (/type\s*=\s*['"]search['"]/i.test(html) ||
+        (/search/i.test(html) && /<input/i.test(html))) &&
+      !/<label/i.test(html) &&
+      !(/aria-label\s*=/i.test(html)) &&
+      (/placeholder\s*=/i.test(html) || !/role\s*=\s*['"]search['"]/i.test(html)),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description: "A search input has no visible label or aria-label, or is not wrapped in a search landmark. Screen reader users may hear an unlabelled edit field and cannot jump to search via landmarks.",
+      impact: "serious",
+      fix: "Wrap in <form role=\"search\"> or use aria-label on the form. Add a visible <label> or aria-label=\"Search\" on the input. Give the submit button aria-label=\"Submit search\".",
+      learnMoreUrl: "https://wcaginpractice.com/playground#search"
+    }
+  },
+  {
+    id: "radiocheckbox-missing-fieldset",
+    test: (html) => {
+      const hasRadioOrCheckbox =
+        /type\s*=\s*['"]radio['"]/i.test(html) ||
+        /type\s*=\s*['"]checkbox['"]/i.test(html);
+      if (!hasRadioOrCheckbox) return false;
+      const count = (html.match(/type\s*=\s*['"]radio['"]/gi) || []).length +
+        (html.match(/type\s*=\s*['"]checkbox['"]/gi) || []).length;
+      if (count < 2) return false;
+      return !/<fieldset/i.test(html);
+    },
+    issue: {
+      wcagRef: "WCAG 1.3.1",
+      description: "Multiple radio buttons or checkboxes are not wrapped in a fieldset with a legend. Screen reader users hear each option without the group question or context.",
+      impact: "serious",
+      fix: "Wrap the group in <fieldset> with a <legend> describing the question. Link each input to its label with htmlFor/id. Use the same name attribute for radio options in one group.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#radiocheckbox"
+    }
+  },
+  {
+    id: "dragdrop-no-keyboard-alternative",
+    test: (html) =>
+      (/draggable|drag-and-drop|dragdrop|sortable|kanban/i.test(html) ||
+        /ondrag|dragstart/i.test(html)) &&
+      !/move up|move down|aria-keyshortcuts|keyboard/i.test(html) &&
+      !/<button[^>]*(?:up|down|move)/i.test(html),
+    issue: {
+      wcagRef: "WCAG 2.5.7",
+      description: "A drag-and-drop or reorder interface appears to have no keyboard alternative. Users who cannot drag with a pointer cannot complete the same action.",
+      impact: "critical",
+      fix: "Provide buttons to move items up, down, or to a target. Announce new position with aria-live and aria-describedby. Keep pointer drag as an optional enhancement.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#dragdrop"
+    }
+  },
+  {
+    id: "pagination-missing-nav",
+    test: (html) =>
+      (/pagination|page-\d|pager/i.test(html) || /next|previous/i.test(html) && /page/i.test(html)) &&
+      !/<nav/i.test(html) &&
+      (/pagination|pager/i.test(html) || /<a[^>]*>\s*\d+\s*<\/a>/i.test(html)),
+    issue: {
+      wcagRef: "WCAG 2.4.1",
+      description: "Pagination controls are not wrapped in a nav landmark with aria-label. Screen reader users cannot identify or jump to the pagination region quickly.",
+      impact: "moderate",
+      fix: "Wrap pagination in <nav aria-label=\"Pagination\">. Mark the current page with aria-current=\"page\" as a span (not a link). Add aria-label to Previous and Next controls.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#pagination"
+    }
+  },
+  {
+    id: "pagination-missing-current",
+    test: (html) =>
+      /<nav/i.test(html) &&
+      /pagination|pager/i.test(html) &&
+      !/aria-current\s*=\s*['"]page['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description: "Pagination is present but the current page is not marked with aria-current=page. Screen reader users cannot tell which page they are on.",
+      impact: "moderate",
+      fix: "Use <span aria-current=\"page\"> for the current page number instead of a link. Keep other pages as links.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#pagination"
+    }
+  },
+  {
+    id: "progress-missing-aria",
+    test: (html) =>
+      (/progress|loading|spinner|uploading/i.test(html)) &&
+      !/role\s*=\s*['"]progressbar['"]/i.test(html) &&
+      !/aria-live/i.test(html) &&
+      !/role\s*=\s*['"]status['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.3",
+      description: "A progress or loading indicator has no role=progressbar, aria-valuenow, aria-label, or live region. Screen reader users receive no feedback while waiting or when the task completes.",
+      impact: "serious",
+      fix: "For known progress: role=progressbar with aria-valuenow, aria-valuemin, aria-valuemax, and aria-label. For indeterminate loading: aria-live=polite and role=status with a text label. Announce completion when done.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#progress"
+    }
+  },
+  {
+    id: "carousel-missing-controls",
+    test: (html) => {
+      if (!/carousel|slideshow|slider/i.test(html)) return false;
+      const hasAutoPlay = /autoplay|auto-play|setInterval/i.test(html);
+      const missingPause = hasAutoPlay && !/pause/i.test(html);
+      const divNav = /<div[^>]*(?:prev|next|previous)/i.test(html) &&
+        !/<button[^>]*(?:prev|next|previous)/i.test(html);
+      const slidesNoLive = /slide/i.test(html) && !/aria-live/i.test(html);
+      return missingPause || divNav || slidesNoLive;
+    },
+    issue: {
+      wcagRef: "WCAG 2.1.1",
+      description: "A carousel or slideshow appears to lack accessible controls: no pause for auto-play, non-button prev/next, or no live region for slide changes.",
+      impact: "serious",
+      fix: "Add a keyboard-accessible Pause button, use real buttons for Previous/Next with aria-labels, label each slide (e.g. Slide 2 of 4), and use aria-live=polite for announcements. Pause auto-play on focus and hover.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#carousel"
+    }
+  },
+  {
+    id: "datepicker-missing-keyboard",
+    test: (html) =>
+      (/datepicker|calendar|date-picker/i.test(html) ||
+        (/role\s*=\s*['"]grid['"]/i.test(html) && /date/i.test(html))) &&
+      !/aria-selected/i.test(html) &&
+      !/<table/i.test(html),
+    issue: {
+      wcagRef: "WCAG 2.1.1",
+      description: "A date picker or calendar grid appears to lack keyboard grid navigation and aria-selected for the chosen date. Users may have to Tab through every date cell individually.",
+      impact: "serious",
+      fix: "Use a table or grid with Arrow key navigation, aria-selected on the chosen date, Enter/Space to select, and a labelled text input fallback (e.g. type=date or format hint).",
+      learnMoreUrl: "https://wcaginpractice.com/playground#datepicker"
+    }
+  },
+  {
+    id: "tooltip-missing-aria",
+    test: (html) =>
+      /tooltip|popover|hint/i.test(html) &&
+      !/role\s*=\s*['"]tooltip['"]/i.test(html) &&
+      !/aria-describedby/i.test(html),
+    issue: {
+      wcagRef: "WCAG 1.4.13",
+      description: "Tooltip content is present but missing role=tooltip and aria-describedby on the trigger. Keyboard users may not see hover-only tooltips and screen readers may not announce the extra information.",
+      impact: "serious",
+      fix: "Add role=tooltip to the tooltip element and aria-describedby on the trigger pointing to the tooltip id. Show the tooltip on focus and hover. Allow Escape to dismiss it without moving focus.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#tooltip"
+    }
+  },
+  {
+    id: "combobox-missing-aria",
+    test: (html) =>
+      /<input[^>]*>/i.test(html) &&
+      (/<ul|<ol|suggestion|autocomplete|listbox/i.test(html)) &&
+      !/role\s*=\s*['"]combobox['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 2.1.1",
+      description: "An autocomplete or combobox input is missing role=combobox and related ARIA. Screen readers treat it as a plain text field and keyboard users cannot navigate suggestions.",
+      impact: "serious",
+      fix: "Add role=combobox, aria-expanded, aria-autocomplete=list, and aria-controls pointing to the listbox id. Use role=listbox on the list and role=option on each suggestion. Support Arrow keys, Enter, and Escape.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#combobox"
+    }
+  },
+  {
     id: "dropdown-missing-aria-expanded",
     test: (html) =>
       (/<button[^>]*>/i.test(html) || /<div[^>]*>/i.test(html)) &&
@@ -177,6 +394,91 @@ const rules: CheckRule[] = [
       impact: "moderate",
       fix: "Use headings in sequential order: h1, then h2, then h3. Never skip a level. Use CSS to control visual size, not heading level.",
       learnMoreUrl: "https://wcaginpractice.com/playground#headings"
+    }
+  },
+  {
+    id: "radiocheckbox",
+    test: (html) =>
+      (/type\s*=\s*['"]radio['"]/i.test(html) ||
+        /type\s*=\s*['"]checkbox['"]/i.test(html)) &&
+      !/<fieldset/i.test(html),
+    issue: {
+      wcagRef: "WCAG 1.3.1",
+      description:
+        "Radio buttons or checkboxes are present with no fieldset and legend. Screen reader users will hear each option label in isolation with no context about what they are choosing.",
+      impact: "serious",
+      fix:
+        "Wrap the group in a fieldset element and add a legend that describes the group question. This links the group label to every input inside it.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#radiocheckbox"
+    }
+  },
+  {
+    id: "search-missing-role",
+    test: (html) =>
+      /type\s*=\s*['"]search['"]/i.test(html) &&
+      !/role\s*=\s*['"]search['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description:
+        "A search input is present but no role=search landmark exists. Screen reader users cannot jump directly to search using landmark navigation shortcuts.",
+      impact: "moderate",
+      fix:
+        "Add role=search to the form element wrapping the search input. This creates a search landmark that screen reader users can navigate to directly.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#search"
+    }
+  },
+  {
+    id: "file-input-hidden",
+    test: (html) =>
+      /type\s*=\s*['"]file['"]/i.test(html) &&
+      (/display\s*:\s*none|display\s*:\s*['"]none['"]|visibility\s*:\s*hidden/i.test(
+        html
+      )),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description:
+        "A file input is hidden with display:none or visibility:hidden. This removes it from keyboard access entirely. Screen reader users and keyboard users cannot activate the file picker.",
+      impact: "critical",
+      fix:
+        "Use opacity:0 and position:absolute to visually hide the input while keeping it accessible. Never use display:none or visibility:hidden on a file input.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#fileupload"
+    }
+  },
+  {
+    id: "alertdialog-missing-role",
+    test: (html) =>
+      (/confirm|delete|warning|destructive|are you sure/i.test(html)) &&
+      /role\s*=\s*['"]dialog['"]/i.test(html) &&
+      !/role\s*=\s*['"]alertdialog['"]/i.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description:
+        "A confirmation or warning dialog uses role=dialog instead of role=alertdialog. Screen reader users will not be informed of the urgent and interactive nature of the prompt.",
+      impact: "serious",
+      fix:
+        "Replace role=dialog with role=alertdialog for any dialog that requires an immediate response from the user. Add aria-describedby pointing to the warning message.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#alertdialog"
+    }
+  },
+  {
+    id: "breadcrumb-missing-label",
+    test: (html) => {
+      if (!/<nav/i.test(html)) return false;
+      const hasBreadcrumbRef =
+        /class\s*=\s*['"][^'"]*breadcrumb[^'"]*['"]/i.test(html) ||
+        /id\s*=\s*['"][^'"]*breadcrumb[^'"]*['"]/i.test(html) ||
+        /aria-label\s*=\s*['"][^'"]*breadcrumb[^'"]*['"]/i.test(html);
+      if (!hasBreadcrumbRef) return false;
+      return !/<nav[^>]*\baria-label\s*=/i.test(html);
+    },
+    issue: {
+      wcagRef: "WCAG 2.4.8",
+      description:
+        "A breadcrumb navigation exists but the nav element has no aria-label. Screen reader users cannot distinguish it from other navigation landmarks on the page.",
+      impact: "moderate",
+      fix:
+        "Add aria-label='Breadcrumb' to the nav element wrapping the breadcrumb links. This makes it a distinct and identifiable landmark.",
+      learnMoreUrl: "https://wcaginpractice.com/playground#breadcrumb"
     }
   }
 ];

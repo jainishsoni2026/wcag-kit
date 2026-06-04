@@ -37,7 +37,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           "Use this when a developer asks what accessibility patterns are available, " +
           "what wcag-kit covers, or what WCAG issues you can help with. " +
           "Also use this before calling get_pattern or suggest_fix to confirm a valid pattern ID exists. " +
-          "Returns all 13 pattern names, WCAG references, and one-line summaries.",
+          "Returns all 27 pattern names, WCAG references, and one-line summaries.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -53,7 +53,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           "Trigger phrases include: 'how do I make X accessible', 'what is wrong with my X', " +
           "'explain the accessibility requirements for X', 'who does this affect'. " +
           "Valid pattern IDs: dropdown, modal, form, headings, button, image, contrast, " +
-          "navigation, accordion, tabs, toast, table, focus.",
+          "navigation, accordion, tabs, toast, table, focus, combobox, tooltip, datepicker, carousel, progress, pagination, dragdrop, radiocheckbox, search, infinitescroll, fileupload, skeleton, alertdialog, breadcrumb.",
         inputSchema: {
           type: "object",
           properties: {
@@ -62,7 +62,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 "Pattern ID matching the component type. " +
                 "Map common developer terms to IDs: " +
-                "menu/select/combobox -> dropdown, " +
+                "menu/select -> dropdown, " +
+                "breadcrumb trail/location path -> breadcrumb, " +
+                "confirm dialog/destructive confirm/delete confirmation -> alertdialog, " +
+                "autocomplete/typeahead/search suggestions -> combobox, " +
+                "site search/search box/find -> search, " +
+                "infinite scroll/load more/lazy load feed -> infinitescroll, " +
+                "file upload/attachment/choose file -> fileupload, " +
+                "skeleton loader/placeholder/shimmer -> skeleton, " +
+                "hover hint/popover/info icon -> tooltip, " +
+                "calendar/date input/booking date -> datepicker, " +
+                "slideshow/slider/image rotator -> carousel, " +
+                "loading spinner/progress bar/upload percent -> progress, " +
+                "page numbers/pager/search results pages -> pagination, " +
+                "reorder/kanban/sortable list/drag and drop -> dragdrop, " +
+                "radio group/checkbox group/fieldset -> radiocheckbox, " +
                 "popup/overlay/lightbox -> modal, " +
                 "input validation/error message -> form, " +
                 "h1/h2/page structure -> headings, " +
@@ -120,7 +134,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           "Returns the broken version, the accessible version, and a plain-English explanation " +
           "of every change made and why it matters. " +
           "Valid pattern IDs: dropdown, modal, form, headings, button, image, contrast, " +
-          "navigation, accordion, tabs, toast, table, focus.",
+          "navigation, accordion, tabs, toast, table, focus, combobox, tooltip, datepicker, carousel, progress, pagination, dragdrop, radiocheckbox, search, infinitescroll, fileupload, skeleton, alertdialog, breadcrumb.",
         inputSchema: {
           type: "object",
           properties: {
@@ -129,7 +143,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 "Pattern ID matching the component the developer is asking about. " +
                 "Use the same mapping as get_pattern: " +
-                "menu/select/combobox -> dropdown, " +
+                "menu/select -> dropdown, " +
+                "breadcrumb trail/location path -> breadcrumb, " +
+                "confirm dialog/destructive confirm/delete confirmation -> alertdialog, " +
+                "autocomplete/typeahead/search suggestions -> combobox, " +
+                "site search/search box/find -> search, " +
+                "infinite scroll/load more/lazy load feed -> infinitescroll, " +
+                "file upload/attachment/choose file -> fileupload, " +
+                "skeleton loader/placeholder/shimmer -> skeleton, " +
+                "hover hint/popover/info icon -> tooltip, " +
+                "calendar/date input/booking date -> datepicker, " +
+                "slideshow/slider/image rotator -> carousel, " +
+                "loading spinner/progress bar/upload percent -> progress, " +
+                "page numbers/pager/search results pages -> pagination, " +
+                "reorder/kanban/sortable list/drag and drop -> dragdrop, " +
+                "radio group/checkbox group/fieldset -> radiocheckbox, " +
                 "popup/overlay/lightbox -> modal, " +
                 "input validation/error message -> form, " +
                 "h1/h2/page structure -> headings, " +

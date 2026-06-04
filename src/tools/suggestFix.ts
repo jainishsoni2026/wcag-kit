@@ -505,6 +505,598 @@ function About() {
 // What the screen reader announces after navigation:
 // "About, heading level 1"
 // User immediately knows they are on the About page.`
+  },
+
+  combobox: {
+    badCode: `<!-- BAD: plain input with styled list, no ARIA, no keyboard navigation -->
+<label for="city">City</label>
+<input type="text" id="city" autocomplete="off" />
+<ul class="suggestions" id="city-suggestions" style="display:none">
+  <li onclick="selectCity('Toronto')">Toronto</li>
+  <li onclick="selectCity('Ottawa')">Ottawa</li>
+  <li onclick="selectCity('Vancouver')">Vancouver</li>
+</ul>
+
+<!-- JS shows list on input but Arrow keys do nothing -->
+<!-- Screen reader announces only: City, edit text -->`,
+    fixedCode: `<!-- GOOD: role=combobox, aria-expanded, aria-controls, listbox + options -->
+<label for="city">City</label>
+<input
+  type="text"
+  id="city"
+  role="combobox"
+  aria-expanded="false"
+  aria-autocomplete="list"
+  aria-controls="city-listbox"
+  aria-activedescendant=""
+  autocomplete="off"
+/>
+<ul
+  role="listbox"
+  id="city-listbox"
+  hidden
+>
+  <li role="option" id="city-opt-1" tabindex="-1">Toronto</li>
+  <li role="option" id="city-opt-2" tabindex="-1">Ottawa</li>
+  <li role="option" id="city-opt-3" tabindex="-1">Vancouver</li>
+</ul>
+
+<!-- JS keyboard pattern:
+  Arrow Down: open list (aria-expanded=true), move active option, set aria-activedescendant
+  Arrow Up/Down: navigate options
+  Enter: select option value into input, close list (aria-expanded=false)
+  Escape: close list, return focus to input -->`
+  },
+
+  tooltip: {
+    badCode: `<!-- BAD: hover only, no focus, no ARIA -->
+<button id="info-btn" class="icon-btn">
+  <span aria-hidden="true">?</span>
+</button>
+<div class="tooltip" id="info-tip" style="display:none">
+  More information about this setting
+</div>
+
+<script>
+  const btn = document.getElementById('info-btn');
+  const tip = document.getElementById('info-tip');
+  btn.addEventListener('mouseenter', () => { tip.style.display = 'block'; });
+  btn.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+</script>
+
+<!-- Keyboard users never see the tooltip -->
+<!-- Screen reader announces only: button -->`,
+    fixedCode: `<!-- GOOD: focus + hover, role=tooltip, aria-describedby, Escape to dismiss -->
+<button
+  id="info-btn"
+  class="icon-btn"
+  aria-describedby="info-tip"
+  aria-label="More information"
+>
+  <span aria-hidden="true">?</span>
+</button>
+<div
+  role="tooltip"
+  id="info-tip"
+  hidden
+>
+  More information about this setting
+</div>
+
+<script>
+  const btn = document.getElementById('info-btn');
+  const tip = document.getElementById('info-tip');
+  let open = false;
+
+  function show() { tip.hidden = false; open = true; }
+  function hide() { tip.hidden = true; open = false; }
+
+  btn.addEventListener('mouseenter', show);
+  btn.addEventListener('focus', show);
+  btn.addEventListener('mouseleave', (e) => {
+    if (!tip.contains(e.relatedTarget)) hide();
+  });
+  btn.addEventListener('blur', hide);
+  tip.addEventListener('mouseenter', show);
+  tip.addEventListener('mouseleave', hide);
+  btn.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && open) { hide(); e.stopPropagation(); }
+  });
+</script>
+
+<!-- Notes:
+  - aria-describedby links trigger to tooltip for screen readers
+  - role=tooltip exposes the element as tooltip content
+  - Show on focus and hover for keyboard and mouse users
+  - Escape dismisses without moving focus
+  - Keep visible when pointer moves onto the tooltip -->`
+  },
+
+  datepicker: {
+    badCode: `<!-- BAD: div grid, Tab through every date, click only -->
+<label>Appointment date</label>
+<input type="text" id="appt-date" placeholder="Select date" readonly />
+<div class="calendar" id="cal" hidden>
+  <div class="cal-row">
+    <div tabindex="0" onclick="pick('2026-06-01')">1</div>
+    <div tabindex="0" onclick="pick('2026-06-02')">2</div>
+    <!-- ... every date is tabindex=0, Tab visits each one -->
+  </div>
+</div>
+
+<!-- Arrow keys do nothing. No aria-selected. No text fallback. -->`,
+    fixedCode: `<!-- GOOD: labelled input fallback + grid calendar with ARIA -->
+<label for="appt-date">Appointment date</label>
+<input
+  type="date"
+  id="appt-date"
+  aria-describedby="appt-date-hint"
+/>
+<span id="appt-date-hint">Format: YYYY-MM-DD. Or use the calendar button.</span>
+
+<button
+  type="button"
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-controls="cal-dialog"
+  id="cal-trigger"
+>
+  Open calendar
+</button>
+
+<div
+  role="dialog"
+  id="cal-dialog"
+  aria-label="Choose appointment date"
+  hidden
+>
+  <table role="grid" aria-label="June 2026">
+    <thead>
+      <tr>
+        <th scope="col">Sun</th>
+        <th scope="col">Mon</th>
+        <!-- ... -->
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td role="gridcell" tabindex="-1" aria-selected="false">1</td>
+        <td role="gridcell" tabindex="0" aria-selected="true">2</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- JS: Arrow keys move gridcell focus; Enter/Space selects;
+  Page Up/Down change month; Escape closes dialog;
+  Always keep type=date or text input as the accessible fallback -->`
+  },
+
+  carousel: {
+    badCode: `<!-- BAD: auto-play, no pause, div prev/next, silent slide changes -->
+<div class="carousel" data-autoplay="true">
+  <div class="slide active">Welcome to our product</div>
+  <div class="slide">New features this month</div>
+  <div class="slide">Sign up today</div>
+  <div class="prev" onclick="prevSlide()">‹</div>
+  <div class="next" onclick="nextSlide()">›</div>
+</div>
+
+<script>
+  setInterval(nextSlide, 4000); // no pause button
+</script>
+
+<!-- Keyboard cannot reach prev/next. Screen reader hears nothing on change. -->`,
+    fixedCode: `<!-- GOOD: pause, button controls, labelled slides, aria-live -->
+<section aria-roledescription="carousel" aria-label="Featured announcements">
+  <div aria-live="polite" aria-atomic="true" class="sr-only" id="carousel-status"></div>
+
+  <div
+    role="group"
+    aria-roledescription="slide"
+    aria-label="Slide 1 of 3: Welcome to our product"
+    id="slide-1"
+  >
+    Welcome to our product
+  </div>
+
+  <button type="button" id="carousel-pause" aria-label="Pause rotation">
+    Pause
+  </button>
+  <button type="button" aria-label="Previous slide" onclick="prevSlide()">
+    Previous
+  </button>
+  <button type="button" aria-label="Next slide" onclick="nextSlide()">
+    Next
+  </button>
+</section>
+
+<!-- JS: pause stops setInterval; update aria-label on active slide;
+  write slide title to #carousel-status for aria-live announcement;
+  pause auto-play on focusin and mouseenter; respect prefers-reduced-motion -->`
+  },
+
+  progress: {
+    badCode: `<!-- BAD: visual spinner only, no ARIA, silent to screen readers -->
+<form onsubmit="uploadFile(event)">
+  <button type="submit">Upload file</button>
+</form>
+<div class="spinner" id="loader" style="display:none"></div>
+<div class="progress-bar" style="width:45%"></div>
+
+<!-- Screen reader hears nothing during upload or on complete -->`,
+    fixedCode: `<!-- GOOD: determinate progressbar + live region for completion -->
+<p id="upload-label">Uploading document.pdf</p>
+<div
+  role="progressbar"
+  aria-labelledby="upload-label"
+  aria-valuemin="0"
+  aria-valuemax="100"
+  aria-valuenow="45"
+>
+  <div class="progress-fill" style="width:45%"></div>
+</div>
+<p aria-hidden="true">45% complete</p>
+
+<!-- Indeterminate loading alternative -->
+<div
+  role="status"
+  aria-live="polite"
+  aria-busy="true"
+  id="upload-status"
+>
+  Uploading, please wait…
+</div>
+
+<!-- JS: update aria-valuenow and visible text as upload progresses;
+  on complete: aria-busy=false, status text = "Upload complete";
+  aria-live region announces the change -->`
+  },
+
+  pagination: {
+    badCode: `<!-- BAD: div wrapper, current page is a link, no aria-current -->
+<div class="pagination">
+  <a href="?page=1">Previous</a>
+  <a href="?page=1">1</a>
+  <a href="?page=2">2</a>
+  <a href="?page=3" aria-disabled="true">3</a>
+  <a href="?page=4">4</a>
+  <a href="?page=4">Next</a>
+</div>
+
+<!-- Not a landmark. Current page announced as link. No position context. -->`,
+    fixedCode: `<!-- GOOD: nav landmark, aria-current, current page is not a link -->
+<nav aria-label="Pagination">
+  <ul>
+    <li>
+      <a href="?page=2" aria-label="Previous page, page 2">
+        Previous
+      </a>
+    </li>
+    <li><a href="?page=1">1</a></li>
+    <li><a href="?page=2">2</a></li>
+    <li>
+      <span aria-current="page">3</span>
+    </li>
+    <li><a href="?page=4">4</a></li>
+    <li>
+      <a href="?page=4" aria-label="Next page, page 4">
+        Next
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Notes:
+  - nav + aria-label distinguishes pagination from main nav
+  - aria-current=page on span, not <a>
+  - Descriptive aria-label on Previous/Next when text alone is ambiguous
+  - Use a list (ul/li) for a clear structure -->`
+  },
+
+  dragdrop: {
+    badCode: `<!-- BAD: drag only, no keyboard way to reorder -->
+<ul id="task-list">
+  <li draggable="true" ondragstart="drag(event)">Write accessibility report</li>
+  <li draggable="true" ondragstart="drag(event)">Review pull requests</li>
+  <li draggable="true" ondragstart="drag(event)">Update documentation</li>
+</ul>
+
+<!-- Keyboard users cannot reorder. Screen reader hears list items only. -->`,
+    fixedCode: `<!-- GOOD: move buttons + position info + live announcement; drag optional -->
+<div aria-live="polite" class="sr-only" id="reorder-status"></div>
+<ul id="task-list">
+  <li id="task-1">
+    <span id="task-1-pos" class="sr-only">Position 1 of 3</span>
+    <span aria-describedby="task-1-pos">Write accessibility report</span>
+    <button type="button" aria-label="Move Write accessibility report down" onclick="moveDown(1)">
+      Move down
+    </button>
+  </li>
+  <li id="task-2" draggable="true">
+    <span id="task-2-pos" class="sr-only">Position 2 of 3</span>
+    <span aria-describedby="task-2-pos">Review pull requests</span>
+    <button type="button" aria-label="Move Review pull requests up" onclick="moveUp(2)">Move up</button>
+    <button type="button" aria-label="Move Review pull requests down" onclick="moveDown(2)">Move down</button>
+  </li>
+  <!-- ... -->
+</ul>
+
+<!-- JS: buttons reorder DOM; update sr-only position text;
+  set #reorder-status to "Moved to position 2 of 3";
+  pointer drag remains optional enhancement -->`
+  },
+
+  radiocheckbox: {
+    badCode: `<!-- BAD: bold heading only, no fieldset/legend -->
+<p><strong>Preferred contact method</strong></p>
+<div>
+  <input type="radio" id="email" name="contact" />
+  <label for="email">Email</label>
+  <input type="radio" id="phone" name="contact" />
+  <label for="phone">Phone</label>
+</div>
+
+<p><strong>Newsletter topics</strong></p>
+<div>
+  <input type="checkbox" id="news" />
+  <label for="news">Product news</label>
+  <input type="checkbox" id="events" />
+  <label for="events">Events</label>
+</div>
+
+<!-- Screen reader: "Email, radio button" with no group question -->`,
+    fixedCode: `<!-- GOOD: fieldset + legend for each group -->
+<fieldset>
+  <legend>Preferred contact method</legend>
+  <div>
+    <input type="radio" id="contact-email" name="contact" value="email" />
+    <label for="contact-email">Email</label>
+  </div>
+  <div>
+    <input type="radio" id="contact-phone" name="contact" value="phone" />
+    <label for="contact-phone">Phone</label>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Newsletter topics (select all that apply)</legend>
+  <div>
+    <input type="checkbox" id="news" name="topics" value="news" />
+    <label for="news">Product news</label>
+  </div>
+  <div>
+    <input type="checkbox" id="events" name="topics" value="events" />
+    <label for="events">Events</label>
+  </div>
+</fieldset>
+
+<!-- Notes:
+  - legend is announced with each option in the group
+  - Radio: same name attribute; Arrow keys move within group
+  - Checkbox: Space toggles; Tab moves between checkboxes
+  - Never replace fieldset/legend with a styled div or heading alone -->`
+  },
+
+  search: {
+    badCode: `<!-- BAD: placeholder only, div wrapper, icon button with no name -->
+<div class="search-box">
+  <input type="search" placeholder="Search..." />
+  <button type="submit">
+    <svg aria-hidden="true">...</svg>
+  </button>
+</div>
+
+<!-- No search landmark. No label. Submit button unnamed. -->`,
+    fixedCode: `<!-- GOOD: role=search landmark, labelled input, named submit -->
+<form role="search">
+  <label for="site-search" class="sr-only">Search</label>
+  <input
+    type="search"
+    id="site-search"
+    name="q"
+    aria-label="Search"
+  />
+  <button type="submit" aria-label="Submit search">
+    <svg aria-hidden="true" focusable="false">...</svg>
+  </button>
+</form>
+
+<!-- Notes:
+  - role=search creates a landmark (jump with screen reader shortcuts)
+  - Visible label preferred; sr-only label + aria-label both work
+  - Placeholder alone is not a substitute for a label
+  - Icon-only submit needs aria-label -->`
+  },
+
+  infinitescroll: {
+    badCode: `<!-- BAD: infinite scroll injects items silently, focus jumps -->
+<ul id="feed">
+  <li>Post 1</li>
+  <li>Post 2</li>
+</ul>
+
+<script>
+  window.addEventListener('scroll', () => {
+    if (nearBottom()) {
+      fetch('/api/feed?page=2').then(data => {
+        data.items.forEach(item => feed.appendChild(renderItem(item)));
+        // No announcement. Focus may jump if list reflows.
+      });
+    }
+  });
+</script>
+
+<!-- Screen reader users never know more posts loaded -->`,
+    fixedCode: `<!-- GOOD: Load More button, aria-live status, focus stays on button -->
+<ul id="feed" aria-label="Posts">
+  <li>Post 1</li>
+  <li>Post 2</li>
+</ul>
+
+<div aria-live="polite" aria-atomic="true" id="feed-status"></div>
+
+<button type="button" id="load-more" aria-controls="feed">
+  Load more posts
+</button>
+
+<script>
+  const btn = document.getElementById('load-more');
+  const status = document.getElementById('feed-status');
+
+  btn.addEventListener('click', async () => {
+    status.textContent = 'Loading more posts…';
+    btn.disabled = true;
+    const data = await fetch('/api/feed?page=2').then(r => r.json());
+    const added = appendItems(data.items);
+    status.textContent = added + ' new posts loaded. ' + totalCount() + ' posts total.';
+    btn.disabled = false;
+    btn.focus(); // focus stays on Load More
+  });
+</script>
+
+<!-- Optional: keep infinite scroll for pointer users but never remove Load More -->`
+  },
+
+  breadcrumb: {
+    badCode: `<!-- BAD: div trail, all links, separators announced -->
+<div class="breadcrumb">
+  <a href="/">Home</a> /
+  <a href="/products">Products</a> /
+  <a href="/laptops">Laptops</a> /
+  <a href="/macbook-pro">MacBook Pro</a>
+</div>`,
+    fixedCode: `<!-- GOOD: labelled nav, ol, aria-current, hidden separators -->
+<nav aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li>
+      <span aria-hidden="true">/</span>
+      <a href="/products">Products</a>
+    </li>
+    <li>
+      <span aria-hidden="true">/</span>
+      <a href="/laptops">Laptops</a>
+    </li>
+    <li>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">MacBook Pro</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- Notes:
+  - Current page is text, not a link (no reload of same URL)
+  - aria-current="page" exposes location to assistive tech
+  - Ordered list communicates hierarchy and item count -->`
+  },
+
+  alertdialog: {
+    badCode: `<!-- BAD: div confirmation, no alertdialog, focus not managed -->
+<button type="button" onclick="openConfirm()">Delete account</button>
+<div id="confirm" class="overlay" style="display:none">
+  <h2>Delete your account?</h2>
+  <p>This cannot be undone.</p>
+  <button onclick="closeConfirm()">Cancel</button>
+  <button onclick="deleteAccount()">Delete account</button>
+</div>
+
+<!-- Focus stays on trigger. Tab reaches page behind. Escape does nothing. -->`,
+    fixedCode: `<!-- GOOD: alertdialog + focus on Cancel + trap + Escape -->
+<button type="button" id="delete-trigger">Delete account</button>
+<div
+  id="confirm-dialog"
+  role="alertdialog"
+  aria-modal="true"
+  aria-labelledby="confirm-title"
+  aria-describedby="confirm-desc"
+  hidden
+>
+  <h2 id="confirm-title">Delete your account?</h2>
+  <p id="confirm-desc">This cannot be undone. All data will be removed.</p>
+  <button type="button" id="confirm-cancel">Cancel</button>
+  <button type="button" id="confirm-delete">Delete account</button>
+</div>
+
+<script>
+  const trigger = document.getElementById('delete-trigger');
+  const dialog = document.getElementById('confirm-dialog');
+  const cancelBtn = document.getElementById('confirm-cancel');
+
+  function openConfirm() {
+    dialog.hidden = false;
+    cancelBtn.focus(); // least destructive action first
+    document.addEventListener('keydown', trapTab);
+  }
+
+  function closeConfirm() {
+    dialog.hidden = true;
+    document.removeEventListener('keydown', trapTab);
+    trigger.focus();
+  }
+
+  function trapTab(e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeConfirm(); return; }
+    if (e.key !== 'Tab') return;
+    const focusable = dialog.querySelectorAll('button:not([disabled])');
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
+  }
+</script>`
+  },
+
+  fileupload: {
+    badCode: `<!-- BAD: input display:none, div replacement, no announcement -->
+<div class="upload-area" onclick="document.getElementById('file').click()">
+  <span>Choose a file</span>
+</div>
+<input type="file" id="file" style="display:none" />
+
+<!-- Div is not focusable. Screen reader skips upload. Keyboard blocked. -->`,
+    fixedCode: `<!-- GOOD: visually hidden input + label button + live region for filename -->
+<div class="file-upload">
+  <input
+    type="file"
+    id="resume"
+    class="sr-only-input"
+    accept=".pdf,.doc,.docx"
+    aria-describedby="file-help"
+  />
+  <label for="resume" class="upload-button">
+    Choose file to upload
+  </label>
+  <p id="file-help">PDF or Word document, maximum 5 MB</p>
+  <div aria-live="polite" id="file-selected"></div>
+</div>
+
+<style>
+  /* Visually hide but keep focusable — do NOT use display:none */
+  .sr-only-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
+  .upload-button { /* style as needed */ }
+</style>
+
+<script>
+  document.getElementById('resume').addEventListener('change', (e) => {
+    const name = e.target.files[0]?.name || 'No file selected';
+    document.getElementById('file-selected').textContent =
+      'Selected file: ' + name;
+  });
+</script>
+
+<!-- Notes:
+  - label for=id opens picker on click and is announced as the control name
+  - Input stays keyboard accessible (Tab, Enter, Space)
+  - Never use display:none on the native input -->`
   }
 };
 
