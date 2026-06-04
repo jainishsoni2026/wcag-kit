@@ -26,14 +26,18 @@ const server = new Server(
 );
 
 // Register available tools
-// This is what Claude sees when it connects to wcag-kit
+// The description field is what Claude reads to decide when to call each tool.
+// Write descriptions as triggers, not just feature lists.
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
       {
         name: "list_patterns",
         description:
-          "List all available WCAG accessibility patterns. Returns pattern names, WCAG references, and summaries. Use this first to see what patterns are available before calling other tools.",
+          "Use this when a developer asks what accessibility patterns are available, " +
+          "what wcag-kit covers, or what WCAG issues you can help with. " +
+          "Also use this before calling get_pattern or suggest_fix to confirm a valid pattern ID exists. " +
+          "Returns all 13 pattern names, WCAG references, and one-line summaries.",
         inputSchema: {
           type: "object",
           properties: {},
@@ -43,14 +47,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_pattern",
         description:
-          "Get full details for a specific accessibility pattern including what breaks, what to fix, who is affected, and how to test. Use list_patterns first to get valid pattern IDs.",
+          "Use this when a developer asks how to make a specific UI component accessible, " +
+          "what WCAG rule applies to a component, who is affected by an inaccessible component, " +
+          "or how to test a component for accessibility. " +
+          "Trigger phrases include: 'how do I make X accessible', 'what is wrong with my X', " +
+          "'explain the accessibility requirements for X', 'who does this affect'. " +
+          "Valid pattern IDs: dropdown, modal, form, headings, button, image, contrast, " +
+          "navigation, accordion, tabs, toast, table, focus.",
         inputSchema: {
           type: "object",
           properties: {
             id: {
               type: "string",
               description:
-                "Pattern ID. Valid values: dropdown, modal, form, headings, button, image, contrast, navigation, accordion, tabs, toast, table, focus"
+                "Pattern ID matching the component type. " +
+                "Map common developer terms to IDs: " +
+                "menu/select/combobox -> dropdown, " +
+                "popup/overlay/lightbox -> modal, " +
+                "input validation/error message -> form, " +
+                "h1/h2/page structure -> headings, " +
+                "click handler/div button/icon button -> button, " +
+                "img/photo/icon -> image, " +
+                "colour/color/contrast ratio -> contrast, " +
+                "nav/menu bar/links -> navigation, " +
+                "expand/collapse/FAQ -> accordion, " +
+                "tab panel/tabbed interface -> tabs, " +
+                "notification/snackbar/banner -> toast, " +
+                "data grid/rows and columns -> table, " +
+                "SPA/route change/page transition -> focus."
             }
           },
           required: ["id"]
@@ -59,14 +83,25 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "check_component",
         description:
-          "Scan an HTML snippet for common accessibility issues. Returns a list of violations with WCAG references, impact levels, and plain-English fix suggestions. This is a static pattern check, not a full browser audit. For production use, also run axe-core.",
+          "Use this proactively whenever a developer shares HTML markup, " +
+          "asks if their code is accessible, asks you to review a component, " +
+          "or pastes code that contains interactive elements like buttons, forms, " +
+          "images, inputs, modals, navs, tables, or custom widgets. " +
+          "Do not wait to be asked explicitly. If HTML is present and accessibility " +
+          "has not been confirmed, run this tool. " +
+          "Trigger phrases include: 'is this accessible', 'check this', 'review my code', " +
+          "'what is wrong with this', 'does this pass WCAG', 'audit this component'. " +
+          "Returns a list of violations with WCAG references, impact levels, and fix suggestions. " +
+          "Always follow up with suggest_fix for any critical or serious issues found.",
         inputSchema: {
           type: "object",
           properties: {
             html: {
               type: "string",
               description:
-                "The HTML snippet to check. Paste the component markup directly. Example: '<div onclick=\"open()\">Menu</div>'"
+                "The HTML snippet to check. Extract just the relevant markup from " +
+                "whatever the developer shared. Works with partial snippets, " +
+                "full components, or copied browser inspector output."
             }
           },
           required: ["html"]
@@ -75,14 +110,38 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "suggest_fix",
         description:
-          "Get a side-by-side bad and good code example for a specific accessibility pattern. Returns the broken version, the accessible version, and an explanation of what changed and why. Use list_patterns first to get valid pattern IDs.",
+          "Use this after check_component finds issues, or whenever a developer asks " +
+          "how to fix an accessibility problem, asks for the correct pattern, " +
+          "asks to see a working example, or asks what accessible code looks like. " +
+          "Also use this when a developer asks about a specific pattern by name or describes " +
+          "a component they are building. " +
+          "Trigger phrases include: 'how do I fix this', 'show me the correct code', " +
+          "'what does accessible X look like', 'give me an example', 'how should I write this'. " +
+          "Returns the broken version, the accessible version, and a plain-English explanation " +
+          "of every change made and why it matters. " +
+          "Valid pattern IDs: dropdown, modal, form, headings, button, image, contrast, " +
+          "navigation, accordion, tabs, toast, table, focus.",
         inputSchema: {
           type: "object",
           properties: {
             patternId: {
               type: "string",
               description:
-                "Pattern ID to get fix examples for. Valid values: dropdown, modal, form, headings, button, image, contrast, navigation, accordion, tabs, toast, table, focus"
+                "Pattern ID matching the component the developer is asking about. " +
+                "Use the same mapping as get_pattern: " +
+                "menu/select/combobox -> dropdown, " +
+                "popup/overlay/lightbox -> modal, " +
+                "input validation/error message -> form, " +
+                "h1/h2/page structure -> headings, " +
+                "click handler/div button/icon button -> button, " +
+                "img/photo/icon -> image, " +
+                "colour/color/contrast ratio -> contrast, " +
+                "nav/menu bar/links -> navigation, " +
+                "expand/collapse/FAQ -> accordion, " +
+                "tab panel/tabbed interface -> tabs, " +
+                "notification/snackbar/banner -> toast, " +
+                "data grid/rows and columns -> table, " +
+                "SPA/route change/page transition -> focus."
             }
           },
           required: ["patternId"]
@@ -93,7 +152,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 // Handle tool calls
-// This runs when Claude calls one of the tools above
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
