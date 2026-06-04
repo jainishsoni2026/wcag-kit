@@ -1,5 +1,8 @@
 # wcag-kit
 
+[![npm version](https://img.shields.io/npm/v/wcag-kit.svg)](https://www.npmjs.com/package/wcag-kit)
+[![license](https://img.shields.io/npm/l/wcag-kit.svg)](https://github.com/jainishsoni2026/wcag-kit/blob/main/README.md)
+
 An MCP server that brings WCAG accessibility knowledge into your AI editor.
 
 Ask natural language questions about accessibility. Paste broken components and get diagnosed and fixed. No WCAG expertise required.
@@ -10,11 +13,11 @@ Built by [Jainish Soni](https://wcaginpractice.com) — CPACC Certified.
 
 ## What it does
 
-wcag-kit gives Claude (in Cursor or any MCP-compatible editor) four accessibility tools:
+wcag-kit gives your AI editor accessibility tools:
 
 | Tool | What it does |
 |---|---|
-| `list_patterns` | Lists all 13 WCAG patterns available |
+| `list_patterns` | Lists all available WCAG patterns |
 | `get_pattern` | Returns full details for a specific pattern |
 | `check_component` | Scans an HTML snippet for accessibility violations |
 | `suggest_fix` | Returns bad and good code examples for any pattern |
@@ -26,7 +29,7 @@ You do not call these tools directly. Just ask naturally:
 > "Check this dropdown for WCAG issues"
 > "Show me how to write an accessible data table"
 
-Claude reads the tools and decides when to use them.
+Your AI assistant reads the tools and decides when to use them.
 
 ---
 
@@ -52,9 +55,7 @@ Claude reads the tools and decides when to use them.
 
 ## Install
 
-### Cursor
-
-Add to `~/.cursor/mcp.json`:
+Add to your MCP config file:
 
 ```json
 {
@@ -67,13 +68,18 @@ Add to `~/.cursor/mcp.json`:
 }
 ```
 
-Restart Cursor. wcag-kit is now available in every Agent chat.
+Restart your editor. wcag-kit is now available in every AI chat session.
+
+**Config file locations:**
+- Cursor: `~/.cursor/mcp.json`
+- Claude Desktop: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Other editors: check your editor's MCP documentation
 
 ---
 
 ## Example
 
-Paste this into Cursor Agent chat with wcag-kit connected:
+Paste this into any MCP-compatible AI chat:
 
 > I'm building a notification that pops up after a user saves a form. Any accessibility concerns?
 
@@ -86,7 +92,7 @@ No tool names. No WCAG knowledge required. Just ask.
 ## Requirements
 
 - Node.js 18 or higher
-- Cursor or any MCP-compatible editor
+- Any MCP-compatible AI editor
 
 ---
 
