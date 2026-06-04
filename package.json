@@ -1,6 +1,6 @@
 {
   "name": "wcag-kit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP server for web accessibility. Check UI components against WCAG 2.1 and 2.2 patterns and get accessible code fixes.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,8 @@
     "wcag-kit": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "engines": {
     "node": ">=18"
