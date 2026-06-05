@@ -109,14 +109,26 @@ No tool names. No WCAG knowledge required. Just ask.
 - Any MCP-compatible AI editor
 
 ---
+## Part of the wcaginpractice.com ecosystem
+
+wcag-kit is one part of a free accessibility toolkit:
+
+- **wcag-kit** (this tool) — MCP server that gives AI assistants deep WCAG knowledge
+- **WCAG Lens** — VS Code/Cursor extension with real-time diagnostics as you type:
+  https://marketplace.visualstudio.com/items?itemName=jainishsoni.wcag-lens
+- **wcaginpractice.com** — interactive playground with 27 broken vs fixed patterns:
+  https://wcaginpractice.com
+
+Use all three together: learn on the site, enforce with the extension, 
+ask your AI assistant using wcag-kit.
 
 ## Learn more
 
 - Full interactive examples: [wcaginpractice.com](https://wcaginpractice.com)
+- WCAG Lens extension: [marketplace.visualstudio.com](https://marketplace.visualstudio.com/items?itemName=jainishsoni.wcag-lens)
 - WCAG 2.2 specification: [w3.org/WAI/WCAG22](https://www.w3.org/WAI/WCAG22/)
+- Suggest a pattern: [wcaginpractice.com/contribute](https://wcaginpractice.com/contribute)
 - Report an issue: [github.com/jainishsoni2026/wcag-kit/issues](https://github.com/jainishsoni2026/wcag-kit/issues)
-
----
 
 ## License
 
