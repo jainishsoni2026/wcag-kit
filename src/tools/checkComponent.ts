@@ -480,6 +480,17 @@ const rules: CheckRule[] = [
         "Add aria-label='Breadcrumb' to the nav element wrapping the breadcrumb links. This makes it a distinct and identifiable landmark.",
       learnMoreUrl: "https://wcaginpractice.com/playground#breadcrumb"
     }
+  },
+  {
+    id: "empty-aria-label",
+    test: (html) => /aria-label\s*=\s*["']\s*["']/.test(html),
+    issue: {
+      wcagRef: "WCAG 4.1.2",
+      description: "aria-label is present but empty. This overrides visible text and leaves the element with no accessible name. Screen readers may announce the control as unnamed.",
+      impact: "critical",
+      fix: "Remove the empty aria-label if the element has visible text. For icon-only elements, provide a meaningful value like aria-label=\"Close\".",
+      learnMoreUrl: "https://wcaginpractice.com/playground#button"
+    }
   }
 ];
 

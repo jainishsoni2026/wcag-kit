@@ -109,6 +109,7 @@ No tool names. No WCAG knowledge required. Just ask.
 - Any MCP-compatible AI editor
 
 ---
+
 ## Part of the wcaginpractice.com ecosystem
 
 wcag-kit is one part of a free accessibility toolkit:
@@ -119,8 +120,10 @@ wcag-kit is one part of a free accessibility toolkit:
 - **wcaginpractice.com** — interactive playground with 27 broken vs fixed patterns:
   https://wcaginpractice.com
 
-Use all three together: learn on the site, enforce with the extension, 
+Use all three together: learn on the site, enforce with the extension,
 ask your AI assistant using wcag-kit.
+
+---
 
 ## Learn more
 
@@ -129,6 +132,21 @@ ask your AI assistant using wcag-kit.
 - WCAG 2.2 specification: [w3.org/WAI/WCAG22](https://www.w3.org/WAI/WCAG22/)
 - Suggest a pattern: [wcaginpractice.com/contribute](https://wcaginpractice.com/contribute)
 - Report an issue: [github.com/jainishsoni2026/wcag-kit/issues](https://github.com/jainishsoni2026/wcag-kit/issues)
+
+---
+
+## Suggest a rule
+
+Missing a pattern you see in real products?
+https://wcaginpractice.com/contribute
+
+---
+
+## CPACC Certification
+
+https://www.credly.com/badges/40cf41b8-ad65-4591-8f0b-c13e1ad108f1/public_url
+
+---
 
 ## License
 
